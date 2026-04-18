@@ -7,7 +7,6 @@ import io.payorch.core.model.PaymentEvent;
 import io.payorch.core.model.PaymentRequest;
 import io.payorch.core.model.PaymentResult;
 import io.payorch.core.model.PaymentStatus;
-import io.payorch.core.model.ProviderCapabilities;
 import io.payorch.core.model.ProviderCredentials;
 import io.payorch.core.model.RefundRequest;
 import io.payorch.core.model.RefundResult;
@@ -22,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 

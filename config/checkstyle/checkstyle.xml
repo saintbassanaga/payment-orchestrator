@@ -6,6 +6,12 @@
     <property name="severity"        value="error"/>
     <property name="fileExtensions"  value="java"/>
 
+    <!-- Allow snake_case method names in test classes -->
+    <module name="SuppressionSingleFilter">
+        <property name="files"  value=".*Test\.java$"/>
+        <property name="checks" value="MethodName|MissingJavadocMethod|MissingJavadocType"/>
+    </module>
+
     <module name="NewlineAtEndOfFile"/>
     <module name="FileTabCharacter"/>
     <module name="FileLength">
@@ -50,7 +56,7 @@
 
         <!-- Javadoc — enforced on public API only -->
         <module name="MissingJavadocMethod">
-            <property name="scope"                  value="public"/>
+            <property name="scope"                       value="public"/>
             <property name="allowMissingPropertyJavadoc" value="true"/>
         </module>
         <module name="MissingJavadocType">

@@ -48,6 +48,13 @@ publishing {
                         url  = "https://www.apache.org/licenses/LICENSE-2.0"
                     }
                 }
+                developers {
+                    developer {
+                        id    = "payorch"
+                        name  = "PayOrch Contributors"
+                        email = "contact@payorch.io"
+                    }
+                }
                 scm {
                     connection          = "scm:git:git://github.com/payorch/payorch.git"
                     developerConnection = "scm:git:ssh://github.com/payorch/payorch.git"

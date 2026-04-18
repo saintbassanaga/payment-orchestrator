@@ -35,6 +35,11 @@ publishing {
 }
 
 signing {
+    val gpgKey        = System.getenv("GPG_PRIVATE_KEY")
+    val gpgPassphrase = System.getenv("GPG_PASSPHRASE")
+    if (gpgKey != null && gpgPassphrase != null) {
+        useInMemoryPgpKeys(gpgKey, gpgPassphrase)
+    }
     isRequired = !version.toString().endsWith("-SNAPSHOT")
     sign(publishing.publications["maven"])
 }
