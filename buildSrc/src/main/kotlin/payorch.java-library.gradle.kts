@@ -21,7 +21,7 @@ dependencies {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
-    options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
+    options.compilerArgs.addAll(listOf("-Xlint:all,-processing", "-Werror"))
 }
 
 tasks.withType<Test>().configureEach {

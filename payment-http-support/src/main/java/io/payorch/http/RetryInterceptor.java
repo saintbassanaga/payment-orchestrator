@@ -3,6 +3,7 @@ package io.payorch.http;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -42,6 +43,7 @@ public final class RetryInterceptor implements Interceptor {
      * @return the response from the server
      * @throws IOException if all attempts fail
      */
+    @NotNull
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
