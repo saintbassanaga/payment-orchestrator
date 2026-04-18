@@ -1,0 +1,36 @@
+[versions]
+okhttp             = "4.12.0"
+jackson            = "2.17.1"
+google-autoservice = "1.1.1"
+junit              = "5.10.2"
+mockito            = "5.11.0"
+assertj            = "3.25.3"
+wiremock           = "3.6.0"
+spring-boot        = "3.3.0"
+jacoco             = "0.8.12"
+checkstyle         = "10.17.0"
+spotbugs-tool      = "4.8.5"
+spotbugs-plugin    = "6.0.19"
+nexus-publish      = "2.0.0"
+
+[libraries]
+okhttp                    = { module = "com.squareup.okhttp3:okhttp",                             version.ref = "okhttp" }
+okhttp-logging            = { module = "com.squareup.okhttp3:logging-interceptor",                version.ref = "okhttp" }
+jackson-databind          = { module = "com.fasterxml.jackson.core:jackson-databind",             version.ref = "jackson" }
+jackson-datatype-jsr310   = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",  version.ref = "jackson" }
+autoservice               = { module = "com.google.auto.service:auto-service",                    version.ref = "google-autoservice" }
+autoservice-annotations   = { module = "com.google.auto.service:auto-service-annotations",        version.ref = "google-autoservice" }
+junit-bom                 = { module = "org.junit:junit-bom",                                     version.ref = "junit" }
+junit-jupiter             = { module = "org.junit.jupiter:junit-jupiter" }
+junit-launcher            = { module = "org.junit.platform:junit-platform-launcher" }
+mockito-core              = { module = "org.mockito:mockito-core",                                version.ref = "mockito" }
+mockito-junit-jupiter     = { module = "org.mockito:mockito-junit-jupiter",                       version.ref = "mockito" }
+assertj-core              = { module = "org.assertj:assertj-core",                                version.ref = "assertj" }
+wiremock                  = { module = "org.wiremock:wiremock",                                   version.ref = "wiremock" }
+spring-boot-starter       = { module = "org.springframework.boot:spring-boot-starter",            version.ref = "spring-boot" }
+spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure",      version.ref = "spring-boot" }
+spring-boot-starter-test  = { module = "org.springframework.boot:spring-boot-starter-test",       version.ref = "spring-boot" }
+
+[plugins]
+spotbugs      = { id = "com.github.spotbugs",                         version.ref = "spotbugs-plugin" }
+nexus-publish = { id = "io.github.gradle-nexus.publish-plugin",       version.ref = "nexus-publish" }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+    <!-- Generated sources (AutoService, annotation processors) -->
+    <Match>
+        <Source name="~.*[\\/]generated[\\/].*"/>
+    </Match>
+
+    <!-- Test classes — relaxed rules -->
+    <Match>
+        <Source name="~.*Test\.java"/>
+        <Bug category="CORRECTNESS"/>
+    </Match>
+
+</FindBugsFilter>
