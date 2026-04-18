@@ -58,7 +58,7 @@ final class PawaPayClient {
      */
     PawaPayDepositResponse initiateDeposit(PawaPayDepositRequest request) {
         String json = serialize(request);
-        HttpResponse response = http.post(baseUrl + "/v1/deposits", json, authHeaders());
+        HttpResponse response = http.post(baseUrl + "/v2/deposits", json, authHeaders());
         checkResponse(response, "initiate deposit");
         return deserialize(response.body(), PawaPayDepositResponse.class);
     }
@@ -72,7 +72,7 @@ final class PawaPayClient {
      * @throws ProviderUnavailableException if the API is unreachable or returns a server error
      */
     PawaPayDepositResponse getDeposit(String depositId) {
-        HttpResponse response = http.get(baseUrl + "/v1/deposits/" + depositId, authHeaders());
+        HttpResponse response = http.get(baseUrl + "/v2/deposits/" + depositId, authHeaders());
         if (response.statusCode() == 404) {
             throw new TransactionNotFoundException(PROVIDER, depositId);
         }
@@ -89,7 +89,7 @@ final class PawaPayClient {
      */
     PawaPayRefundResponse initiateRefund(PawaPayRefundRequest request) {
         String json = serialize(request);
-        HttpResponse response = http.post(baseUrl + "/v1/refunds", json, authHeaders());
+        HttpResponse response = http.post(baseUrl + "/v2/refunds", json, authHeaders());
         checkResponse(response, "initiate refund");
         return deserialize(response.body(), PawaPayRefundResponse.class);
     }

@@ -54,7 +54,7 @@ class PawaPayProviderSpiTest {
 
     @Test
     void should_initiate_deposit_and_return_initiated_status() {
-        wireMock.stubFor(post(urlEqualTo("/v1/deposits"))
+        wireMock.stubFor(post(urlEqualTo("/v2/deposits"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -81,24 +81,26 @@ class PawaPayProviderSpiTest {
 
     @Test
     void should_get_status_and_return_success() {
-        wireMock.stubFor(get(urlEqualTo("/v1/deposits/TX-002"))
+        // getStatus uses the transactionId directly as the URL path — must be a valid UUID
+        String txId = "a1b2c3d4-e5f6-7890-abcd-ef1234567890";
+        wireMock.stubFor(get(urlEqualTo("/v2/deposits/" + txId))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody("""
                                 {
-                                    "depositId": "TX-002",
+                                    "depositId": "%s",
                                     "status": "COMPLETED",
                                     "requestedAmount": "5000",
                                     "currency": "XAF",
                                     "correspondent": "MTN_MOMO_CMR",
                                     "created": "2026-04-18T10:00:00Z"
                                 }
-                                """)));
+                                """.formatted(txId))));
 
-        PaymentResult result = provider.getStatus("TX-002");
+        PaymentResult result = provider.getStatus(txId);
 
-        assertThat(result.transactionId()).isEqualTo("TX-002");
+        assertThat(result.transactionId()).isEqualTo(txId);
         assertThat(result.status()).isEqualTo(PaymentStatus.SUCCESS);
         assertThat(result.amount().amount()).isEqualByComparingTo("5000");
         assertThat(result.amount().currency()).isEqualTo("XAF");
@@ -106,17 +108,18 @@ class PawaPayProviderSpiTest {
 
     @Test
     void should_throw_transaction_not_found_when_deposit_returns_404() {
-        wireMock.stubFor(get(urlEqualTo("/v1/deposits/TX-UNKNOWN"))
+        String txId = "b2c3d4e5-f6a7-8901-bcde-f12345678901";
+        wireMock.stubFor(get(urlEqualTo("/v2/deposits/" + txId))
                 .willReturn(aResponse().withStatus(404)));
 
-        assertThatThrownBy(() -> provider.getStatus("TX-UNKNOWN"))
+        assertThatThrownBy(() -> provider.getStatus(txId))
                 .isInstanceOf(TransactionNotFoundException.class)
-                .hasMessageContaining("TX-UNKNOWN");
+                .hasMessageContaining(txId);
     }
 
     @Test
     void should_initiate_refund_and_return_result() {
-        wireMock.stubFor(post(urlEqualTo("/v1/refunds"))
+        wireMock.stubFor(post(urlEqualTo("/v2/refunds"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")

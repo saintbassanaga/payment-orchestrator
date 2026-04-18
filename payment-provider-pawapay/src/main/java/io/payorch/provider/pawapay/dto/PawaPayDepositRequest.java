@@ -1,25 +1,29 @@
 package io.payorch.provider.pawapay.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * DTO for initiating a deposit (payment collection) via the PawaPay API.
+ * DTO for initiating a deposit (payment collection) via the PawaPay v2 API.
  *
- * @param depositId            unique identifier for this deposit (caller-supplied)
- * @param amount               the amount as a plain string (e.g. {@code "5000"})
- * @param currency             the ISO 4217 currency code
- * @param correspondent        the mobile money operator code (e.g. {@code "MTN_MOMO_CMR"})
- * @param payer                the payer's MSISDN details
- * @param customerTimestamp    the ISO 8601 timestamp of the customer action
- * @param statementDescription a short description shown on the customer's statement
+ * <p>In v2, {@code correspondent} moves into {@code payer.accountDetails.provider}.
+ * {@code customerMessage} replaces {@code statementDescription} and is capped at
+ * 22 characters by PawaPay.
+ *
+ * @param depositId         unique UUID for this deposit
+ * @param amount            the amount as a plain string (e.g. {@code "5000"})
+ * @param currency          the ISO 4217 currency code
+ * @param payer             the payer's MMO account details (phone + operator)
+ * @param clientReferenceId the caller's internal reference stored by PawaPay
+ * @param customerMessage   short description shown to the customer (max 22 chars)
  * @since 0.1.0
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record PawaPayDepositRequest(
         @JsonProperty("depositId") String depositId,
         @JsonProperty("amount") String amount,
         @JsonProperty("currency") String currency,
-        @JsonProperty("correspondent") String correspondent,
         @JsonProperty("payer") PawaPayPayer payer,
-        @JsonProperty("customerTimestamp") String customerTimestamp,
-        @JsonProperty("statementDescription") String statementDescription) {
+        @JsonProperty("clientReferenceId") String clientReferenceId,
+        @JsonProperty("customerMessage") String customerMessage) {
 }
