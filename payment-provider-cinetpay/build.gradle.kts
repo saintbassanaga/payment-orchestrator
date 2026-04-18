@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.jackson.datatype.jsr310)
     compileOnly(libs.autoservice.annotations)
     annotationProcessor(libs.autoservice)
+    testCompileOnly(libs.autoservice.annotations)
     testImplementation(project(":payment-test-support"))
     testImplementation(libs.wiremock)
 }
