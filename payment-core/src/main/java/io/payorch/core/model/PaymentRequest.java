@@ -37,7 +37,6 @@ public record PaymentRequest(
         Objects.requireNonNull(amount, "amount must not be null");
         Objects.requireNonNull(phoneNumber, "phoneNumber must not be null");
         Objects.requireNonNull(description, "description must not be null");
-        returnUrl = returnUrl != null ? returnUrl : Optional.empty();
         metadata = metadata != null ? Map.copyOf(metadata) : Map.of();
     }
 
