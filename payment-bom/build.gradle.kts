@@ -19,7 +19,6 @@ dependencies {
         api("io.payorch:payment-webhook-support:${project.version}")
         api("io.payorch:payment-provider-pawapay:${project.version}")
         api("io.payorch:payment-provider-cinetpay:${project.version}")
-        api("io.payorch:payment-provider-monetbill:${project.version}")
         api("io.payorch:payment-test-support:${project.version}")
         api("io.payorch:payment-spring-boot-starter:${project.version}")
         api(libs.okhttp)

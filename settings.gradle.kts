@@ -21,7 +21,6 @@ include(
     "payment-webhook-support",
     "payment-provider-pawapay",
     "payment-provider-cinetpay",
-    "payment-provider-monetbill",
     "payment-test-support",
     "payment-spring-boot-starter"
 )
