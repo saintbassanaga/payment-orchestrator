@@ -167,31 +167,52 @@ public final class AmountToWords {
         return inLetter(amount, lang) + " " + currencyLabel(currencyCode.toUpperCase(), lang);
     }
 
+    // ── Magnitude bucketing ───────────────────────────────────────────────────
+
+    /**
+     * Classifies a non-negative long into a numeric magnitude bucket.
+     * Used as the switch selector in {@link #convert} so we get an exhaustive
+     * enum switch on a reference type — valid in Java 21, no preview needed.
+     */
+    private enum Magnitude {
+        ZERO, UNIT, BELOW_100, BELOW_1K, BELOW_1M, BELOW_1B, BILLIONS;
+
+        static Magnitude of(long n) {
+            if (n == 0)               { return ZERO; }
+            if (n < 20)               { return UNIT; }
+            if (n < 100)              { return BELOW_100; }
+            if (n < 1_000)            { return BELOW_1K; }
+            if (n < 1_000_000L)       { return BELOW_1M; }
+            if (n < 1_000_000_000L)   { return BELOW_1B; }
+            return BILLIONS;
+        }
+    }
+
     // ── Core algorithm ────────────────────────────────────────────────────────
 
     private static String convert(long n, boolean terminal, Language lang, Words w) {
-        return switch (n) {
-            case 0                          -> "";
-            case long x when x < 20        -> w.units()[(int) x];
-            case long x when x < 100       -> below100((int) x, terminal, lang, w);
-            case long x when x < 1_000     -> below1000((int) x, terminal, lang, w);
-            case long x when x < 1_000_000L -> {
-                long th  = x / 1_000;
-                long rem = x % 1_000;
+        return switch (Magnitude.of(n)) {
+            case ZERO      -> "";
+            case UNIT      -> w.units()[(int) n];
+            case BELOW_100 -> below100((int) n, terminal, lang, w);
+            case BELOW_1K  -> below1000((int) n, terminal, lang, w);
+            case BELOW_1M  -> {
+                long th  = n / 1_000;
+                long rem = n % 1_000;
                 // French: "un" is omitted before "mille" → "mille" not "un mille"
                 String prefix = (lang == Language.FR && th == 1)
                         ? w.thousand()
                         : convert(th, false, lang, w) + " " + w.thousand();
                 yield rem == 0 ? prefix : prefix + " " + convert(rem, terminal, lang, w);
             }
-            case long x when x < 1_000_000_000L -> {
-                long m   = x / 1_000_000;
-                long rem = x % 1_000_000;
+            case BELOW_1B  -> {
+                long m   = n / 1_000_000;
+                long rem = n % 1_000_000;
                 String label  = m == 1 ? w.millionOne() : w.millionMany();
                 String prefix = convert(m, true, lang, w) + " " + label;
                 yield rem == 0 ? prefix : prefix + " " + convert(rem, terminal, lang, w);
             }
-            default -> {
+            case BILLIONS  -> {
                 long b   = n / 1_000_000_000L;
                 long rem = n % 1_000_000_000L;
                 String label  = b == 1 ? w.billionOne() : w.billionMany();
