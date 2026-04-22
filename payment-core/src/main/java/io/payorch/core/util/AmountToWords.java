@@ -170,76 +170,83 @@ public final class AmountToWords {
     // ── Core algorithm ────────────────────────────────────────────────────────
 
     private static String convert(long n, boolean terminal, Language lang, Words w) {
-        if (n == 0)  return "";
-        if (n < 20)  return w.units()[(int) n];
-        if (n < 100) return below100((int) n, terminal, lang, w);
-        if (n < 1_000) return below1000((int) n, terminal, lang, w);
-
-        if (n < 1_000_000L) {
-            long th  = n / 1_000;
-            long rem = n % 1_000;
-            // French: "un" is omitted before "mille" → "mille" not "un mille"
-            String prefix = (lang == Language.FR && th == 1)
-                    ? w.thousand()
-                    : convert(th, false, lang, w) + " " + w.thousand();
-            return rem == 0 ? prefix : prefix + " " + convert(rem, terminal, lang, w);
-        }
-        if (n < 1_000_000_000L) {
-            long m   = n / 1_000_000;
-            long rem = n % 1_000_000;
-            String label  = m == 1 ? w.millionOne() : w.millionMany();
-            String prefix = convert(m, true, lang, w) + " " + label;
-            return rem == 0 ? prefix : prefix + " " + convert(rem, terminal, lang, w);
-        }
-        long b   = n / 1_000_000_000L;
-        long rem = n % 1_000_000_000L;
-        String label  = b == 1 ? w.billionOne() : w.billionMany();
-        String prefix = convert(b, true, lang, w) + " " + label;
-        return rem == 0 ? prefix : prefix + " " + convert(rem, terminal, lang, w);
+        return switch (n) {
+            case 0                          -> "";
+            case long x when x < 20        -> w.units()[(int) x];
+            case long x when x < 100       -> below100((int) x, terminal, lang, w);
+            case long x when x < 1_000     -> below1000((int) x, terminal, lang, w);
+            case long x when x < 1_000_000L -> {
+                long th  = x / 1_000;
+                long rem = x % 1_000;
+                // French: "un" is omitted before "mille" → "mille" not "un mille"
+                String prefix = (lang == Language.FR && th == 1)
+                        ? w.thousand()
+                        : convert(th, false, lang, w) + " " + w.thousand();
+                yield rem == 0 ? prefix : prefix + " " + convert(rem, terminal, lang, w);
+            }
+            case long x when x < 1_000_000_000L -> {
+                long m   = x / 1_000_000;
+                long rem = x % 1_000_000;
+                String label  = m == 1 ? w.millionOne() : w.millionMany();
+                String prefix = convert(m, true, lang, w) + " " + label;
+                yield rem == 0 ? prefix : prefix + " " + convert(rem, terminal, lang, w);
+            }
+            default -> {
+                long b   = n / 1_000_000_000L;
+                long rem = n % 1_000_000_000L;
+                String label  = b == 1 ? w.billionOne() : w.billionMany();
+                String prefix = convert(b, true, lang, w) + " " + label;
+                yield rem == 0 ? prefix : prefix + " " + convert(rem, terminal, lang, w);
+            }
+        };
     }
 
     /** Handles 20–99. French special cases for 70–99 are algorithmic, not data. */
     private static String below100(int n, boolean terminal, Language lang, Words w) {
         int t = n / 10;
         int u = n % 10;
-        if (lang == Language.EN) {
-            return u == 0 ? w.tens()[t] : w.tens()[t] + "-" + w.units()[u];
-        }
-        // French: 70–79 = soixante + dix..dix-neuf; 71 = soixante et onze
-        if (t == 7) {
-            if (u == 1) return w.tens()[6] + " et " + w.units()[11];
-            return w.tens()[6] + "-" + w.units()[10 + u];
-        }
-        // French: 80 = quatre-vingts (s only when terminal); 81–89 = quatre-vingt-X
-        if (t == 8) {
-            if (u == 0) return terminal ? w.tens()[8] + "s" : w.tens()[8];
-            return w.tens()[8] + "-" + w.units()[u];
-        }
-        // French: 90–99 = quatre-vingt + dix..dix-neuf
-        if (t == 9) return w.tens()[8] + "-" + w.units()[10 + u];
-        if (u == 0) return w.tens()[t];
-        if (u == 1) return w.tens()[t] + " et un";
-        return w.tens()[t] + "-" + w.units()[u];
+        return switch (lang) {
+            case EN -> u == 0 ? w.tens()[t] : w.tens()[t] + "-" + w.units()[u];
+            case FR -> switch (t) {
+                // 70–79: soixante-dix…; 71 = soixante et onze
+                case 7 -> u == 1
+                        ? w.tens()[6] + " et " + w.units()[11]
+                        : w.tens()[6] + "-" + w.units()[10 + u];
+                // 80 = quatre-vingts (s only when terminal); 81–89 = quatre-vingt-X
+                case 8 -> u == 0
+                        ? (terminal ? w.tens()[8] + "s" : w.tens()[8])
+                        : w.tens()[8] + "-" + w.units()[u];
+                // 90–99: quatre-vingt-dix…
+                case 9 -> w.tens()[8] + "-" + w.units()[10 + u];
+                default -> switch (u) {
+                    case 0  -> w.tens()[t];
+                    case 1  -> w.tens()[t] + " et un";
+                    default -> w.tens()[t] + "-" + w.units()[u];
+                };
+            };
+        };
     }
 
     /** Handles 100–999. */
     private static String below1000(int n, boolean terminal, Language lang, Words w) {
-        int h   = n / 100;
-        int rem = n % 100;
-        if (lang == Language.EN) {
-            String base = w.units()[h] + " " + w.hundred();
-            if (rem == 0) return base;
-            return base + " " + (rem < 20 ? w.units()[rem] : below100(rem, terminal, lang, w));
-        }
-        // French: "cent" alone for 100; no "un cent"
-        if (h == 1) {
-            if (rem == 0) return w.hundred();
-            return w.hundred() + " " + (rem < 20 ? w.units()[rem] : below100(rem, terminal, lang, w));
-        }
-        // French: "deux cents" (terminal, no rem) but "deux cent mille" (non-terminal)
-        String base = w.units()[h] + " " + w.hundred();
-        if (rem == 0) return terminal ? base + "s" : base;
-        return base + " " + (rem < 20 ? w.units()[rem] : below100(rem, terminal, lang, w));
+        int    h      = n / 100;
+        int    rem    = n % 100;
+        String subRem = rem == 0 ? "" : " " + (rem < 20 ? w.units()[rem] : below100(rem, terminal, lang, w));
+        return switch (lang) {
+            case EN -> {
+                String base = w.units()[h] + " " + w.hundred();
+                yield rem == 0 ? base : base + subRem;
+            }
+            case FR -> switch (h) {
+                // French: "cent" alone for 100; no "un cent"
+                case 1  -> rem == 0 ? w.hundred() : w.hundred() + subRem;
+                // French: "deux cents" (terminal, no rem) but "deux cent mille" (non-terminal)
+                default -> {
+                    String base = w.units()[h] + " " + w.hundred();
+                    yield rem == 0 ? (terminal ? base + "s" : base) : base + subRem;
+                }
+            };
+        };
     }
 
     // ── Currency labels ───────────────────────────────────────────────────────
@@ -268,7 +275,10 @@ public final class AmountToWords {
     }
 
     private static Words words(Language lang) {
-        return lang == Language.FR ? WORDS_FR : WORDS_EN;
+        return switch (lang) {
+            case FR -> WORDS_FR;
+            case EN -> WORDS_EN;
+        };
     }
 
     private static String capitalize(String s) {

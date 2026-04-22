@@ -16,6 +16,14 @@ public abstract non-sealed class AbstractOfficialProviderSpi implements PaymentP
     private ProviderCredentials credentials;
 
     /**
+     * Initialises the adapter with no credentials yet configured.
+     *
+     * @since 0.1.0
+     */
+    protected AbstractOfficialProviderSpi() {
+    }
+
+    /**
      * Stores the credentials supplied by the caller.
      *
      * @param credentials the provider credentials, never null

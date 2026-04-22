@@ -22,6 +22,14 @@ public final class ProviderRegistry {
     private final Map<String, PaymentProviderSpi> providers = new ConcurrentHashMap<>();
 
     /**
+     * Creates an empty registry; use {@link #loadFromServiceLoader()} or {@link #empty()} instead.
+     *
+     * @since 0.1.0
+     */
+    public ProviderRegistry() {
+    }
+
+    /**
      * Creates a registry pre-loaded with all providers discoverable via {@link ServiceLoader}.
      *
      * @return a new registry containing all SPI-discovered providers
