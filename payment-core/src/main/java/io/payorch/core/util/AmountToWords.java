@@ -178,12 +178,24 @@ public final class AmountToWords {
         ZERO, UNIT, BELOW_100, BELOW_1K, BELOW_1M, BELOW_1B, BILLIONS;
 
         static Magnitude of(long n) {
-            if (n == 0)               { return ZERO; }
-            if (n < 20)               { return UNIT; }
-            if (n < 100)              { return BELOW_100; }
-            if (n < 1_000)            { return BELOW_1K; }
-            if (n < 1_000_000L)       { return BELOW_1M; }
-            if (n < 1_000_000_000L)   { return BELOW_1B; }
+            if (n == 0) {
+                return ZERO;
+            }
+            if (n < 20) {
+                return UNIT;
+            }
+            if (n < 100) {
+                return BELOW_100;
+            }
+            if (n < 1_000) {
+                return BELOW_1K;
+            }
+            if (n < 1_000_000L) {
+                return BELOW_1M;
+            }
+            if (n < 1_000_000_000L) {
+                return BELOW_1B;
+            }
             return BILLIONS;
         }
     }
