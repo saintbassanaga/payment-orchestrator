@@ -67,7 +67,7 @@ class PawaPayProviderSpiTest {
 
         PaymentRequest request = new PaymentRequest(
                 "TX-001", Money.of(new BigDecimal("5000"), "XAF"),
-                "+237600000000", "Test payment",
+                "+237671000001", "Test payment",
                 Optional.empty(), Map.of("correspondent", "MTN_MOMO_CMR")
         );
 
@@ -149,15 +149,105 @@ class PawaPayProviderSpiTest {
 
     @Test
     void should_throw_when_correspondent_is_missing_from_metadata() {
+        // +237222123456 is a valid Cameroonian fixed-line number — carrier DB returns empty
+        // so auto-detection fails and the exception must mention "correspondent"
         PaymentRequest request = new PaymentRequest(
                 "TX-004", Money.of(new BigDecimal("5000"), "XAF"),
-                "+237600000000", "Test payment",
+                "+237222123456", "Test payment",
                 Optional.empty(), Map.of()
         );
 
         assertThatThrownBy(() -> provider.initiate(request))
                 .isInstanceOf(InvalidPaymentRequestException.class)
                 .hasMessageContaining("correspondent");
+    }
+
+    @Test
+    void should_initiate_payout_and_return_initiated_status() {
+        wireMock.stubFor(post(urlEqualTo("/v2/payouts"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""
+                                {
+                                    "payoutId": "PO-001",
+                                    "status": "ACCEPTED",
+                                    "amount": "5000",
+                                    "currency": "XAF",
+                                    "correspondent": "MTN_MOMO_CMR"
+                                }
+                                """)));
+
+        io.payorch.core.model.PayoutRequest request = new io.payorch.core.model.PayoutRequest(
+                "PO-001", Money.of(new BigDecimal("5000"), "XAF"),
+                "+237671000001", "Salary payout",
+                Map.of("correspondent", "MTN_MOMO_CMR")
+        );
+
+        io.payorch.core.model.PayoutResult result = provider.payout(request);
+
+        assertThat(result.payoutId()).isEqualTo("PO-001");
+        assertThat(result.status()).isEqualTo(PaymentStatus.INITIATED);
+        assertThat(result.providerName()).isEqualTo("pawapay");
+        assertThat(result.amount().amount()).isEqualByComparingTo("5000");
+    }
+
+    @Test
+    void should_get_payout_status_and_return_success() {
+        String payoutId = "PO-001";
+        wireMock.stubFor(get(urlEqualTo("/v2/payouts/" + payoutId))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""
+                                {
+                                    "payoutId": "PO-001",
+                                    "status": "COMPLETED",
+                                    "amount": "5000",
+                                    "currency": "XAF"
+                                }
+                                """)));
+
+        io.payorch.core.model.PayoutResult result = provider.getPayoutStatus(payoutId);
+
+        assertThat(result.providerPayoutId()).isEqualTo("PO-001");
+        assertThat(result.status()).isEqualTo(PaymentStatus.SUCCESS);
+    }
+
+    @Test
+    void should_get_refund_status_and_return_refunded() {
+        String refundId = "RF-001";
+        wireMock.stubFor(get(urlEqualTo("/v2/refunds/" + refundId))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""
+                                {
+                                    "refundId": "RF-001",
+                                    "depositId": "TX-003",
+                                    "status": "COMPLETED",
+                                    "amount": "5000",
+                                    "currency": "XAF"
+                                }
+                                """)));
+
+        RefundResult result = provider.getRefundStatus(refundId);
+
+        assertThat(result.refundId()).isEqualTo("RF-001");
+        assertThat(result.originalTransactionId()).isEqualTo("TX-003");
+        assertThat(result.status()).isEqualTo(PaymentStatus.REFUNDED);
+        assertThat(result.amount().amount()).isEqualByComparingTo("5000");
+    }
+
+    @Test
+    void should_throw_transaction_not_found_when_refund_returns_404() {
+        String refundId = "RF-MISSING";
+        wireMock.stubFor(get(urlEqualTo("/v2/refunds/" + refundId))
+                .willReturn(aResponse().withStatus(404)));
+
+        assertThatThrownBy(() -> provider.getRefundStatus(refundId))
+                .isInstanceOf(TransactionNotFoundException.class)
+                .hasMessageContaining(refundId);
     }
 
     @Test

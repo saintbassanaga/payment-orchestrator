@@ -249,6 +249,34 @@ class CinetPayProviderSpiTest {
     }
 
     @Test
+    void should_initiate_payout_and_return_initiated_status() {
+        wireMock.stubFor(post(urlEqualTo("/transfer/contact/bulk/add"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""
+                                {
+                                    "code": "0",
+                                    "message": "SUCCESS",
+                                    "lot": "LOT-123"
+                                }
+                                """)));
+
+        io.payorch.core.model.PayoutRequest request = new io.payorch.core.model.PayoutRequest(
+                "PO-001",
+                Money.of(new BigDecimal("5000"), "XAF"),
+                "+237671000001", "Salary payout", Map.of()
+        );
+
+        io.payorch.core.model.PayoutResult result = provider.payout(request);
+
+        assertThat(result.payoutId()).isEqualTo("PO-001");
+        assertThat(result.providerPayoutId()).isEqualTo("LOT-123");
+        assertThat(result.status()).isEqualTo(PaymentStatus.INITIATED);
+        assertThat(result.providerName()).isEqualTo("cinetpay");
+    }
+
+    @Test
     void should_throw_unsupported_for_refund() {
         RefundRequest request = new RefundRequest(
                 "RF-001", "TX-001",
@@ -263,13 +291,21 @@ class CinetPayProviderSpiTest {
     }
 
     @Test
-    void should_throw_unsupported_for_parse_webhook() {
-        WebhookRequest request = new WebhookRequest("cinetpay", Map.of(), "{}");
+    void should_parse_webhook_and_return_payment_event() {
+        WebhookRequest request = new WebhookRequest("cinetpay", Map.of(), """
+                {
+                    "cpm_trans_id": "TX-999",
+                    "cpm_amount": "5000",
+                    "cpm_currency": "XAF",
+                    "cpm_result": "00"
+                }
+                """);
 
-        assertThatThrownBy(() -> provider.parseWebhook(request))
-                .isInstanceOf(UnsupportedProviderOperationException.class)
-                .hasMessageContaining("cinetpay")
-                .hasMessageContaining("parseWebhook");
+        var event = provider.parseWebhook(request);
+
+        assertThat(event.transactionId()).isEqualTo("TX-999");
+        assertThat(event.status()).isEqualTo(PaymentStatus.SUCCESS);
+        assertThat(event.providerName()).isEqualTo("cinetpay");
     }
 
     @Test

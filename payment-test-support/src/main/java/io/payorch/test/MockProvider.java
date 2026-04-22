@@ -4,6 +4,8 @@ import io.payorch.core.model.PaymentEvent;
 import io.payorch.core.model.PaymentRequest;
 import io.payorch.core.model.PaymentResult;
 import io.payorch.core.model.PaymentStatus;
+import io.payorch.core.model.PayoutRequest;
+import io.payorch.core.model.PayoutResult;
 import io.payorch.core.model.ProviderCapabilities;
 import io.payorch.core.model.ProviderCredentials;
 import io.payorch.core.model.RefundRequest;
@@ -37,6 +39,7 @@ public final class MockProvider implements CommunityPaymentProviderSpi {
     private PaymentResult initiateResult;
     private PaymentResult statusResult;
     private RefundResult refundResult;
+    private PayoutResult payoutResult;
     private PaymentEvent webhookEvent;
     private ProviderCapabilities capabilities;
 
@@ -44,6 +47,7 @@ public final class MockProvider implements CommunityPaymentProviderSpi {
     private int initiateCalls;
     private int getStatusCalls;
     private int refundCalls;
+    private int payoutCalls;
     private int parseWebhookCalls;
 
     /**
@@ -58,6 +62,7 @@ public final class MockProvider implements CommunityPaymentProviderSpi {
         this.initiateResult = PaymentTestFixtures.paymentResult("TX-MOCK", PaymentStatus.INITIATED, name);
         this.statusResult = PaymentTestFixtures.paymentResult("TX-MOCK", PaymentStatus.SUCCESS, name);
         this.refundResult = PaymentTestFixtures.refundResult("RF-MOCK", "TX-MOCK", name);
+        this.payoutResult = PaymentTestFixtures.payoutResult("PO-MOCK", name);
         this.webhookEvent = PaymentTestFixtures.paymentEvent("TX-MOCK", name);
     }
 
@@ -92,6 +97,13 @@ public final class MockProvider implements CommunityPaymentProviderSpi {
         Objects.requireNonNull(request, "request must not be null");
         this.refundCalls++;
         return refundResult;
+    }
+
+    @Override
+    public PayoutResult payout(PayoutRequest request) {
+        Objects.requireNonNull(request, "request must not be null");
+        this.payoutCalls++;
+        return payoutResult;
     }
 
     @Override
@@ -138,6 +150,17 @@ public final class MockProvider implements CommunityPaymentProviderSpi {
      */
     public MockProvider willReturnOnRefund(RefundResult result) {
         this.refundResult = Objects.requireNonNull(result, "result must not be null");
+        return this;
+    }
+
+    /**
+     * Configures the result returned by {@link #payout(PayoutRequest)}.
+     *
+     * @param result the result to return, never null
+     * @return this instance for chaining
+     */
+    public MockProvider willReturnOnPayout(PayoutResult result) {
+        this.payoutResult = Objects.requireNonNull(result, "result must not be null");
         return this;
     }
 
@@ -209,6 +232,15 @@ public final class MockProvider implements CommunityPaymentProviderSpi {
      */
     public int refundCalls() {
         return refundCalls;
+    }
+
+    /**
+     * Returns the number of times {@link #payout} was called.
+     *
+     * @return payout call count
+     */
+    public int payoutCalls() {
+        return payoutCalls;
     }
 
     /**

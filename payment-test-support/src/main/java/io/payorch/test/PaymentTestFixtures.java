@@ -8,6 +8,8 @@ import io.payorch.core.model.PaymentResult;
 import io.payorch.core.model.PaymentStatus;
 import io.payorch.core.model.ProviderCapabilities;
 import io.payorch.core.model.ProviderCredentials;
+import io.payorch.core.model.PayoutRequest;
+import io.payorch.core.model.PayoutResult;
 import io.payorch.core.model.RefundRequest;
 import io.payorch.core.model.RefundResult;
 import io.payorch.core.model.WebhookRequest;
@@ -165,9 +167,38 @@ public final class PaymentTestFixtures {
      *
      * @return full capabilities descriptor
      */
+    /**
+     * Returns a default {@link PayoutRequest} for the given payout ID.
+     *
+     * @param payoutId the payout identifier
+     * @return a payout request with sensible defaults
+     */
+    public static PayoutRequest payoutRequest(String payoutId) {
+        return new PayoutRequest(
+                payoutId, defaultMoney(), "+237671000001", "Test payout", Map.of());
+    }
+
+    /**
+     * Returns a default {@link PayoutResult} with status INITIATED.
+     *
+     * @param payoutId     the payout identifier
+     * @param providerName the provider name
+     * @return a payout result with sensible defaults
+     */
+    public static PayoutResult payoutResult(String payoutId, String providerName) {
+        return new PayoutResult(
+                payoutId, payoutId, PaymentStatus.INITIATED,
+                defaultMoney(), providerName, Optional.empty(), Instant.now());
+    }
+
+    /**
+     * Returns a {@link ProviderCapabilities} where all capabilities are enabled.
+     *
+     * @return full capabilities descriptor
+     */
     public static ProviderCapabilities fullCapabilities() {
         return new ProviderCapabilities(
-                true, true, true,
+                true, true, true, true,
                 List.of("XAF", "XOF", "GHS", "NGN"),
                 List.of(Environment.SANDBOX, Environment.PRODUCTION)
         );

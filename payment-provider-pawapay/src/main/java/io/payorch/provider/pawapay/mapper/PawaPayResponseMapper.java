@@ -5,8 +5,10 @@ import io.payorch.core.model.Money;
 import io.payorch.core.model.PaymentEvent;
 import io.payorch.core.model.PaymentResult;
 import io.payorch.core.model.PaymentStatus;
+import io.payorch.core.model.PayoutResult;
 import io.payorch.core.model.RefundResult;
 import io.payorch.provider.pawapay.dto.PawaPayDepositResponse;
+import io.payorch.provider.pawapay.dto.PawaPayPayoutResponse;
 import io.payorch.provider.pawapay.dto.PawaPayRefundResponse;
 
 import java.math.BigDecimal;
@@ -73,6 +75,28 @@ public final class PawaPayResponseMapper {
     }
 
     /**
+     * Converts a {@link PawaPayPayoutResponse} to a {@link PayoutResult}.
+     *
+     * @param response      the PawaPay payout response
+     * @param payoutId      the caller-supplied payout identifier
+     * @param fallbackMoney the money to use when the response omits amount/currency
+     * @return the normalized payout result
+     */
+    public static PayoutResult toPayoutResult(
+            PawaPayPayoutResponse response, String payoutId, Money fallbackMoney) {
+        Money money = resolvePayoutMoney(response, fallbackMoney);
+        return new PayoutResult(
+                payoutId,
+                response.payoutId(),
+                mapPayoutStatus(response.status()),
+                money,
+                PROVIDER_NAME,
+                Optional.empty(),
+                Instant.now()
+        );
+    }
+
+    /**
      * Converts a {@link PawaPayDepositResponse} (from a webhook payload) to a {@link PaymentEvent}.
      *
      * @param response      the PawaPay deposit response parsed from the webhook body
@@ -122,16 +146,37 @@ public final class PawaPayResponseMapper {
     }
 
     private static Money resolveDepositMoney(PawaPayDepositResponse response, Money fallback) {
-        if (response.requestedAmount() != null && response.currency() != null) {
-            return Money.of(new BigDecimal(response.requestedAmount()), response.currency());
-        }
-        return fallback;
+        return Optional.ofNullable(response.requestedAmount())
+                .filter(a -> response.currency() != null)
+                .map(a -> Money.of(new BigDecimal(a), response.currency()))
+                .orElse(fallback);
+    }
+
+    private static PaymentStatus mapPayoutStatus(String pawaPayStatus) {
+        return switch (pawaPayStatus) {
+            case "ACCEPTED"  -> PaymentStatus.INITIATED;
+            case "SUBMITTED" -> PaymentStatus.PENDING;
+            case "COMPLETED" -> PaymentStatus.SUCCESS;
+            case "FAILED"    -> PaymentStatus.FAILED;
+            case "REJECTED"  -> PaymentStatus.CANCELLED;
+            case "EXPIRED"   -> PaymentStatus.EXPIRED;
+            default -> throw new ProviderUnavailableException(
+                    "PawaPay returned unknown payout status '%s' — adapter update required"
+                            .formatted(pawaPayStatus));
+        };
+    }
+
+    private static Money resolvePayoutMoney(PawaPayPayoutResponse response, Money fallback) {
+        return Optional.ofNullable(response.amount())
+                .filter(a -> response.currency() != null)
+                .map(a -> Money.of(new BigDecimal(a), response.currency()))
+                .orElse(fallback);
     }
 
     private static Money resolveRefundMoney(PawaPayRefundResponse response, Money fallback) {
-        if (response.amount() != null && response.currency() != null) {
-            return Money.of(new BigDecimal(response.amount()), response.currency());
-        }
-        return fallback;
+        return Optional.ofNullable(response.amount())
+                .filter(a -> response.currency() != null)
+                .map(a -> Money.of(new BigDecimal(a), response.currency()))
+                .orElse(fallback);
     }
 }

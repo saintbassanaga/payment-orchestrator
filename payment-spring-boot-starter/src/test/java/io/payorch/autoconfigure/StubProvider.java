@@ -6,6 +6,8 @@ import io.payorch.core.model.PaymentRequest;
 import io.payorch.core.model.PaymentResult;
 import io.payorch.core.model.ProviderCapabilities;
 import io.payorch.core.model.ProviderCredentials;
+import io.payorch.core.model.PayoutRequest;
+import io.payorch.core.model.PayoutResult;
 import io.payorch.core.model.RefundRequest;
 import io.payorch.core.model.RefundResult;
 import io.payorch.core.model.WebhookRequest;
@@ -46,12 +48,17 @@ final class StubProvider implements CommunityPaymentProviderSpi {
     }
 
     @Override
+    public PayoutResult payout(PayoutRequest request) {
+        throw new UnsupportedProviderOperationException(name, "payout");
+    }
+
+    @Override
     public PaymentEvent parseWebhook(WebhookRequest request) {
         throw new UnsupportedProviderOperationException(name, "parseWebhook");
     }
 
     @Override
     public ProviderCapabilities capabilities() {
-        return new ProviderCapabilities(false, false, false, List.of(), List.of());
+        return new ProviderCapabilities(false, false, false, false, List.of(), List.of());
     }
 }

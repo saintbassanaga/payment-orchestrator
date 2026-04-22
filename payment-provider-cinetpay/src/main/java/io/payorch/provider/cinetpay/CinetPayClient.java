@@ -13,6 +13,8 @@ import io.payorch.provider.cinetpay.dto.CinetPayCheckRequest;
 import io.payorch.provider.cinetpay.dto.CinetPayCheckResponse;
 import io.payorch.provider.cinetpay.dto.CinetPayPaymentRequest;
 import io.payorch.provider.cinetpay.dto.CinetPayPaymentResponse;
+import io.payorch.provider.cinetpay.dto.CinetPayTransferRequest;
+import io.payorch.provider.cinetpay.dto.CinetPayTransferResponse;
 
 import java.util.Map;
 import java.util.Objects;
@@ -77,6 +79,21 @@ final class CinetPayClient {
         }
         checkResponse(response, "check payment");
         return deserialize(response.body(), CinetPayCheckResponse.class);
+    }
+
+    /**
+     * Initiates a payout (transfer) to a recipient's mobile-money account.
+     *
+     * @param request the transfer request DTO
+     * @return the CinetPay transfer response
+     * @throws ProviderUnavailableException if the API returns a server error
+     * @throws ProviderAuthException        if the API returns 401 or 403
+     */
+    CinetPayTransferResponse initiatePayout(CinetPayTransferRequest request) {
+        String json = serialize(request);
+        HttpResponse response = http.post(baseUrl + "/transfer/contact/bulk/add", json, jsonHeaders());
+        checkResponse(response, "initiate payout");
+        return deserialize(response.body(), CinetPayTransferResponse.class);
     }
 
     private Map<String, String> jsonHeaders() {

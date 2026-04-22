@@ -9,6 +9,7 @@ description = "PayOrch adapter — CinetPay provider"
 dependencies {
     api(project(":payment-core"))
     implementation(project(":payment-http-support"))
+    implementation(project(":payment-webhook-support"))
     implementation(libs.jackson.databind)
     implementation(libs.jackson.datatype.jsr310)
     compileOnly(libs.autoservice.annotations)
