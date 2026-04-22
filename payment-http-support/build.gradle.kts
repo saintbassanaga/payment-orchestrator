@@ -10,4 +10,5 @@ dependencies {
     api(project(":payment-core"))
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+    testImplementation(libs.okhttp.mockwebserver)
 }
