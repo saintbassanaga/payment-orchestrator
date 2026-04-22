@@ -4,13 +4,23 @@ plugins {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url  = uri("https://maven.pkg.github.com/saintbassanaga/payorch")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR") ?: ""
+                password = System.getenv("GITHUB_TOKEN") ?: ""
+            }
+        }
+    }
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
             pom {
                 name = project.name
                 description = project.description ?: project.name
-                url = "https://github.com/payorch/payorch"
+                url = "https://github.com/saintbassanaga/payorch"
                 licenses {
                     license {
                         name = "Apache License, Version 2.0"
@@ -19,15 +29,15 @@ publishing {
                 }
                 developers {
                     developer {
-                        id    = "payorch"
-                        name  = "PayOrch Contributors"
-                        email = "contact@payorch.io"
+                        id    = "saintbassanaga"
+                        name  = "Saint Bassanaga"
+                        email = "saintbassanaga01@gmail.com"
                     }
                 }
                 scm {
-                    connection          = "scm:git:git://github.com/payorch/payorch.git"
-                    developerConnection = "scm:git:ssh://github.com/payorch/payorch.git"
-                    url                 = "https://github.com/payorch/payorch"
+                    connection          = "scm:git:git://github.com/saintbassanaga/payorch.git"
+                    developerConnection = "scm:git:ssh://github.com/saintbassanaga/payorch.git"
+                    url                 = "https://github.com/saintbassanaga/payorch"
                 }
             }
         }
