@@ -19,6 +19,7 @@ include(
     "payment-core",
     "payment-http-support",
     "payment-webhook-support",
+    "payment-phone-support",
     "payment-provider-pawapay",
     "payment-provider-cinetpay",
     "payment-test-support",

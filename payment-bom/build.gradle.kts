@@ -17,6 +17,7 @@ dependencies {
         api("io.payorch:payment-core:${project.version}")
         api("io.payorch:payment-http-support:${project.version}")
         api("io.payorch:payment-webhook-support:${project.version}")
+        api("io.payorch:payment-phone-support:${project.version}")
         api("io.payorch:payment-provider-pawapay:${project.version}")
         api("io.payorch:payment-provider-cinetpay:${project.version}")
         api("io.payorch:payment-test-support:${project.version}")
