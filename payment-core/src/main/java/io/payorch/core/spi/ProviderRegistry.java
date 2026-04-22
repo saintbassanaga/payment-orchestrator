@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -64,11 +65,8 @@ public final class ProviderRegistry {
      */
     public PaymentProviderSpi get(String providerName) {
         Objects.requireNonNull(providerName, "providerName must not be null");
-        PaymentProviderSpi provider = providers.get(providerName);
-        if (provider == null) {
-            throw new ProviderNotFoundException(providerName);
-        }
-        return provider;
+        return Optional.ofNullable(providers.get(providerName))
+                .orElseThrow(() -> new ProviderNotFoundException(providerName));
     }
 
     /**

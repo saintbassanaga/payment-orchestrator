@@ -7,6 +7,7 @@ import java.util.Objects;
  * Describes the capabilities and constraints of a payment provider adapter.
  *
  * @param supportsRefund        whether the provider supports refund operations
+ * @param supportsPayout        whether the provider supports payout (disbursement) operations
  * @param supportsWebhook       whether the provider can emit and validate webhooks
  * @param supportsStatusCheck   whether the provider supports polling for transaction status
  * @param supportedCurrencies   the ISO 4217 currency codes accepted by the provider
@@ -15,6 +16,7 @@ import java.util.Objects;
  */
 public record ProviderCapabilities(
         boolean supportsRefund,
+        boolean supportsPayout,
         boolean supportsWebhook,
         boolean supportsStatusCheck,
         List<String> supportedCurrencies,

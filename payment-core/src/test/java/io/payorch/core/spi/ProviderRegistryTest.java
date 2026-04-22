@@ -129,13 +129,18 @@ class ProviderRegistryTest {
         }
 
         @Override
+        public io.payorch.core.model.PayoutResult payout(io.payorch.core.model.PayoutRequest request) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public PaymentEvent parseWebhook(WebhookRequest request) {
             throw new UnsupportedOperationException();
         }
 
         @Override
         public ProviderCapabilities capabilities() {
-            return new ProviderCapabilities(false, false, false, List.of(), List.of());
+            return new ProviderCapabilities(false, false, false, false, List.of(), List.of());
         }
     }
 }

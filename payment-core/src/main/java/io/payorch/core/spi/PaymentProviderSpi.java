@@ -3,6 +3,8 @@ package io.payorch.core.spi;
 import io.payorch.core.model.PaymentEvent;
 import io.payorch.core.model.PaymentRequest;
 import io.payorch.core.model.PaymentResult;
+import io.payorch.core.model.PayoutRequest;
+import io.payorch.core.model.PayoutResult;
 import io.payorch.core.model.ProviderCapabilities;
 import io.payorch.core.model.ProviderCredentials;
 import io.payorch.core.model.RefundRequest;
@@ -73,6 +75,18 @@ public sealed interface PaymentProviderSpi
      * @throws io.payorch.core.exception.ProviderUnavailableException           if the provider is unreachable
      */
     RefundResult refund(RefundRequest request);
+
+    /**
+     * Disburses money to a recipient's mobile-money account (payout).
+     *
+     * @param request the normalized payout request, never null
+     * @return the normalized payout result, never null
+     * @throws io.payorch.core.exception.UnsupportedProviderOperationException if payouts are not supported
+     * @throws io.payorch.core.exception.InvalidPaymentRequestException         if the request is invalid
+     * @throws io.payorch.core.exception.ProviderUnavailableException           if the provider is unreachable
+     * @since 0.1.0
+     */
+    PayoutResult payout(PayoutRequest request);
 
     /**
      * Parses and validates an inbound webhook payload into a normalized event.
