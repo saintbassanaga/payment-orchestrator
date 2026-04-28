@@ -17,7 +17,10 @@ class BearerTokenCacheTest {
     @Test
     void should_call_supplier_once_on_first_get() {
         AtomicInteger calls = new AtomicInteger();
-        Supplier<String> fetcher = () -> { calls.incrementAndGet(); return "token-1"; };
+        Supplier<String> fetcher = () -> {
+            calls.incrementAndGet();
+            return "token-1";
+        };
 
         BearerTokenCache cache = new BearerTokenCache("test", fetcher, Duration.ofMinutes(1));
         String token = cache.get();
@@ -29,7 +32,10 @@ class BearerTokenCacheTest {
     @Test
     void should_return_cached_token_on_second_get() {
         AtomicInteger calls = new AtomicInteger();
-        Supplier<String> fetcher = () -> { calls.incrementAndGet(); return "token-1"; };
+        Supplier<String> fetcher = () -> {
+            calls.incrementAndGet();
+            return "token-1";
+        };
 
         BearerTokenCache cache = new BearerTokenCache("test", fetcher, Duration.ofMinutes(1));
         cache.get();
@@ -87,7 +93,10 @@ class BearerTokenCacheTest {
     void should_call_supplier_only_once_under_concurrent_access() throws InterruptedException {
         AtomicInteger calls = new AtomicInteger();
         Supplier<String> fetcher = () -> {
-            try { Thread.sleep(10); } catch (InterruptedException ignored) { }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {
+            }
             return "token-" + calls.incrementAndGet();
         };
 
