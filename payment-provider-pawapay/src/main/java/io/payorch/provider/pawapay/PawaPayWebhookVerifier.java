@@ -77,7 +77,9 @@ final class PawaPayWebhookVerifier {
     }
 
     private synchronized Optional<PublicKey> fetchAndCache() {
-        if (isCacheValid()) return Optional.of(cachedKey); // double-checked locking
+        if (isCacheValid()) {
+            return Optional.of(cachedKey); // double-checked locking
+        }
         Optional<PublicKey> fetched = client.fetchPublicKey();
         fetched.ifPresent(key -> {
             this.cachedKey = key;

@@ -168,7 +168,9 @@ public final class Rfc9421Verifier {
 
     private static void checkReplay(String inputValue, long windowSecs) {
         Matcher m = CREATED_PATTERN.matcher(inputValue);
-        if (!m.find()) return; // no created= — skip anti-replay
+        if (!m.find()) {
+            return; // no created= — skip anti-replay
+        }
         try {
             long created = Long.parseLong(m.group(1));
             long skew    = Math.abs(Instant.now().getEpochSecond() - created);
@@ -202,9 +204,13 @@ public final class Rfc9421Verifier {
         List<String> result = new ArrayList<>();
         int start = inputValue.indexOf('(');
         int end   = inputValue.indexOf(')');
-        if (start < 0 || end <= start) return result;
+        if (start < 0 || end <= start) {
+            return result;
+        }
         Matcher m = COMPONENT_PATTERN.matcher(inputValue.substring(start + 1, end));
-        while (m.find()) result.add(m.group(1));
+        while (m.find()) {
+            result.add(m.group(1));
+        }
         return result;
     }
 

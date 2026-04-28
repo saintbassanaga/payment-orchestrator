@@ -4,6 +4,7 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberToCarrierMapper;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -44,17 +45,12 @@ public final class OperatorDetector {
                     PHONE_UTIL.parse(phone.e164(), null);
             String carrier = CARRIER_MAPPER.getNameForNumber(parsed, Locale.ENGLISH)
                     .toLowerCase(Locale.ROOT);
-            if (carrier.isEmpty())           return Optional.empty();
-            if (carrier.contains("mtn"))     return Optional.of(MobileOperator.MTN);
-            if (carrier.contains("orange"))  return Optional.of(MobileOperator.ORANGE);
-            if (carrier.contains("airtel"))  return Optional.of(MobileOperator.AIRTEL);
-            if (carrier.contains("moov"))    return Optional.of(MobileOperator.MOOV);
-            if (carrier.contains("wave"))    return Optional.of(MobileOperator.WAVE);
-            if (carrier.contains("vodacom")) return Optional.of(MobileOperator.VODACOM);
-            if (carrier.contains("vodafone"))return Optional.of(MobileOperator.VODAFONE);
-            if (carrier.contains("tigo"))    return Optional.of(MobileOperator.TIGO);
-            if (carrier.contains("zamtel"))  return Optional.of(MobileOperator.ZAMTEL);
-            return Optional.empty();
+            if (carrier.isEmpty()) {
+                return Optional.empty();
+            }
+            return Arrays.stream(MobileOperator.values())
+                    .filter(op -> carrier.contains(op.name().toLowerCase(Locale.ROOT)))
+                    .findFirst();
         } catch (NumberParseException e) {
             return Optional.empty();
         }

@@ -177,11 +177,17 @@ final class PawaPayClient {
     private static String extractPemFromResponse(String json) throws Exception {
         // Minimal parse — response is: [{"id":"...","key":"-----BEGIN PUBLIC KEY-----..."}]
         int keyIndex = json.indexOf("\"key\"");
-        if (keyIndex < 0) return null;
+        if (keyIndex < 0) {
+            return null;
+        }
         int start = json.indexOf('"', keyIndex + 5);
-        if (start < 0) return null;
+        if (start < 0) {
+            return null;
+        }
         int end = json.indexOf('"', start + 1);
-        if (end < 0) return null;
+        if (end < 0) {
+            return null;
+        }
         return json.substring(start + 1, end).replace("\\n", "\n");
     }
 
