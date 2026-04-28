@@ -43,7 +43,7 @@ public record Money(BigDecimal amount, String currency) {
      * @param amount   the positive monetary amount
      * @param currency the ISO 4217 currency code
      * @return a validated {@code Money} instance
-     * @throws InvalidPaymentRequestException if amount or currency is invalid
+     * @throws InvalidPaymentRequestException if the amount or currency is invalid
      */
     public static Money of(BigDecimal amount, String currency) {
         return new Money(amount, currency);
